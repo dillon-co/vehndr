@@ -1,11 +1,7 @@
-"use client";
-
-import { useSearchParams } from "next/navigation";
-
-export default function CheckoutLanding() {
-  const params = useSearchParams();
-  const vendorId = params.get("vendorId");
-  const items = params.get("items");
+export default async function CheckoutLanding({ searchParams }) {
+  const params = await searchParams;
+  const vendorId = params?.vendorId ?? null;
+  const items = params?.items ?? null;
 
   return (
     <div className="mx-auto max-w-2xl p-6">
