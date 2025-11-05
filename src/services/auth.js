@@ -1,26 +1,35 @@
 "use client";
 
-// Placeholder auth service. Replace with real API calls.
-
-let currentUser = null;
+import { api } from "./api";
 
 export async function getCurrentUser() {
-  return currentUser;
+  try {
+    return await api("/api/auth/current_user");
+  } catch (err) {
+    if (err?.status === 401) return null;
+    throw err;
+  }
 }
 
-export async function login({ email }) {
-  // Fake login: any email logs in as a vendor
-  currentUser = {
-    id: "vendor_demo_1",
-    role: "vendor",
-    name: "Demo Vendor",
-    email,
-  };
-  return currentUser;
+export async function login({ email, password }) {
+  const result = await api("/api/auth/login", {
+    method: "POST",
+    body: { email, password },
+  });
+  if (typeof window !== "undefined" && result?.token) {
+    window.localStorage.setItem("vehndr_token", result.token);
+  }
+  return result?.user || result;
 }
 
 export async function logout() {
-  currentUser = null;
+  try {
+    await api("/api/auth/logout", { method: "POST" });
+  } finally {
+    if (typeof window !== "undefined") {
+      window.localStorage.removeItem("vehndr_token");
+    }
+  }
 }
 
 

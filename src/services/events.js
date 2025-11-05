@@ -1,6 +1,8 @@
-// Placeholder events service. Replace with real API calls.
+import { api } from "./api";
 
-const EVENTS = [
+// Backend does not expose events routes yet; try API first, fallback to mock data.
+
+const FALLBACK_EVENTS = [
   {
     id: "event_coachella_2024",
     name: "Coachella 2024",
@@ -14,85 +16,44 @@ const EVENTS = [
     attendees: 125000,
     status: "upcoming",
   },
-  {
-    id: "event_sxsw_2024",
-    name: "SXSW 2024",
-    description: "Film, Interactive Media, and Music Festival",
-    location: "Austin, TX",
-    startDate: "2024-03-08",
-    endDate: "2024-03-16",
-    image: "/window.svg",
-    category: "Tech & Music",
-    vendorIds: ["vendor_demo_1", "vendor_arts_1", "vendor_drink_1"],
-    attendees: 75000,
-    status: "upcoming",
-  },
-  {
-    id: "event_edc_2024",
-    name: "EDC Las Vegas 2024",
-    description: "Electric Daisy Carnival - Premier electronic dance music festival",
-    location: "Las Vegas, NV",
-    startDate: "2024-05-17",
-    endDate: "2024-05-19",
-    image: "/vercel.svg",
-    category: "EDM Festival",
-    vendorIds: ["vendor_drink_1", "vendor_service_1", "vendor_demo_1"],
-    attendees: 150000,
-    status: "upcoming",
-  },
-  {
-    id: "event_acl_2024",
-    name: "Austin City Limits 2024",
-    description: "Annual music festival in Zilker Park",
-    location: "Austin, TX",
-    startDate: "2024-10-04",
-    endDate: "2024-10-13",
-    image: "/file.svg",
-    category: "Music Festival",
-    vendorIds: ["vendor_food_1", "vendor_drink_1", "vendor_arts_1", "vendor_demo_1"],
-    attendees: 90000,
-    status: "upcoming",
-  },
-  {
-    id: "event_burning_man_2024",
-    name: "Burning Man 2024",
-    description: "Art and community in the Black Rock Desert",
-    location: "Black Rock City, NV",
-    startDate: "2024-08-25",
-    endDate: "2024-09-02",
-    image: "/window.svg",
-    category: "Art Festival",
-    vendorIds: ["vendor_arts_1", "vendor_service_1"],
-    attendees: 70000,
-    status: "upcoming",
-  },
-  {
-    id: "event_bonnaroo_2024",
-    name: "Bonnaroo 2024",
-    description: "Music and Arts Festival on the Farm",
-    location: "Manchester, TN",
-    startDate: "2024-06-13",
-    endDate: "2024-06-16",
-    image: "/globe.svg",
-    category: "Music Festival",
-    vendorIds: ["vendor_food_1", "vendor_demo_1", "vendor_drink_1", "vendor_service_1", "vendor_arts_1"],
-    attendees: 85000,
-    status: "upcoming",
-  },
 ];
 
+function fallbackList() {
+  return FALLBACK_EVENTS;
+}
+
+function fallbackFind(id) {
+  return FALLBACK_EVENTS.find((e) => e.id === id) ?? null;
+}
+
 export async function listEvents() {
-  return EVENTS;
+  try {
+    return await api("/api/events");
+  } catch (_) {
+    return fallbackList();
+  }
 }
 
 export async function getEvent(eventId) {
-  return EVENTS.find((e) => e.id === eventId) ?? null;
+  try {
+    return await api(`/api/events/${eventId}`);
+  } catch (_) {
+    return fallbackFind(eventId);
+  }
 }
 
 export async function getEventsByVendor(vendorId) {
-  return EVENTS.filter((e) => e.vendorIds.includes(vendorId));
+  try {
+    return await api(`/api/events?vendor_id=${encodeURIComponent(vendorId)}`);
+  } catch (_) {
+    return fallbackList().filter((e) => e.vendorIds?.includes(vendorId));
+  }
 }
 
 export async function getUpcomingEvents(limit = 6) {
-  return EVENTS.filter((e) => e.status === "upcoming").slice(0, limit);
+  try {
+    return await api(`/api/events?status=upcoming&limit=${limit}`);
+  } catch (_) {
+    return fallbackList().filter((e) => e.status === "upcoming").slice(0, limit);
+  }
 }

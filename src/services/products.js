@@ -1,8 +1,7 @@
-// Thin wrapper over vendors products for future separation
-import { getVendorProducts } from "./vendors";
+import { api } from "./api";
 
 export async function listProductsForVendor(vendorId) {
-  return getVendorProducts(vendorId);
+  return api(`/api/vendors/${vendorId}/products`);
 }
 
 
